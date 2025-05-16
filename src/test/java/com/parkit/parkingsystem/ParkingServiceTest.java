@@ -7,9 +7,11 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -51,11 +53,18 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest() {
-        when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(1);
+        //when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(1);
+        ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
+
         parkingService.processExitingVehicle();
+        verify(ticketDAO).updateTicket(ticketCaptor.capture());
+        Ticket ticket = ticketCaptor.getValue();
+        assertNotNull(ticket.getOutTime());
+        assertTrue(ticket.getPrice() > 0);
+
         verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
         verify(ticketDAO, times(1)).updateTicket(any(Ticket.class));
-        verify(ticketDAO, times(1)).getNbTicket("ABCDEF");
+
     }
 
     @Test
@@ -64,21 +73,38 @@ public class ParkingServiceTest {
         when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
         when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(1);
 
+        ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
+
         parkingService.processIncomingVehicle();
 
+        verify(ticketDAO).saveTicket(ticketCaptor.capture());
+        Ticket ticket = ticketCaptor.getValue();
+
+        assertEquals("ABCDEF", ticket.getVehicleRegNumber());
+        assertNotNull(ticket.getInTime());
+        assertNull(ticket.getOutTime());
+
         verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
-        verify(ticketDAO, times(1)).saveTicket(any(Ticket.class));
         verify(ticketDAO, times(1)).getNbTicket("ABCDEF");
 
     }
 
     @Test
     public void processExitingVehicleTestUnableUpdate(){
-        when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(1);
+
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+
+        ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
+
         parkingService.processExitingVehicle();
-        verify(ticketDAO, times(1)).updateTicket(any(Ticket.class));
-        verify(ticketDAO, times(1)).getNbTicket("ABCDEF");
+
+        verify(ticketDAO).updateTicket(ticketCaptor.capture());
+        Ticket ticket = ticketCaptor.getValue();
+
+        assertEquals("ABCDEF", ticket.getVehicleRegNumber());
+        assertNotNull(ticket.getOutTime());
+
+
     }
 
     @Test
@@ -90,6 +116,7 @@ public class ParkingServiceTest {
 
         assertEquals(1, parkingSpot.getId());
         assertTrue(parkingSpot.isAvailable());
+        verify(parkingSpotDAO, times(1)).getNextAvailableSlot(ParkingType.CAR);
 
     }
 
