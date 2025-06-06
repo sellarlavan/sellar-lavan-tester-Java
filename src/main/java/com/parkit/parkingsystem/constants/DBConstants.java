@@ -13,8 +13,9 @@ public class DBConstants {
                     "FROM ticket t, parking p " +
                     "WHERE p.parking_number = t.parking_number " +
                     "AND t.VEHICLE_REG_NUMBER = ? " +
-                    "AND t.OUT_TIME IS NULL " +
-                    "ORDER BY t.IN_TIME DESC LIMIT 1";
+                    "ORDER BY t.ID DESC LIMIT 1";
+
+
 
 
 }

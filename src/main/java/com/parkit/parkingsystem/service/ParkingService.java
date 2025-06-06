@@ -32,6 +32,13 @@ public class ParkingService {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
             if (parkingSpot != null && parkingSpot.getId() > 0) {
                 String vehicleRegNumber = getVehichleRegNumber();
+
+                Ticket lastTicket = ticketDAO.getTicket(vehicleRegNumber);
+                if (lastTicket != null && lastTicket.getOutTime() == null) {
+                    System.out.println("Ce véhicule est déjà enregistré dans le parking. Veuillez le faire sortir avant d'entrer à nouveau.");
+                    return;
+                }
+
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
 
