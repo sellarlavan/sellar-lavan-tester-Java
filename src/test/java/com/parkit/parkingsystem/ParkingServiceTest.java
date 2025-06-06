@@ -68,12 +68,12 @@ public class ParkingServiceTest {
 
     }
 
-    // TODO ce test echoue
-    @Disabled
     @Test
     public void testProcessIncomingVehicle() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
         when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
+        when(ticketDAO.getTicket("ABCDEF")).thenReturn(null);
         when(ticketDAO.getNbTicket("ABCDEF")).thenReturn(1);
 
         ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
@@ -89,8 +89,8 @@ public class ParkingServiceTest {
 
         verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
         verify(ticketDAO, times(1)).getNbTicket("ABCDEF");
-
     }
+
 
     @Test
     public void processExitingVehicleTestUnableUpdate(){
