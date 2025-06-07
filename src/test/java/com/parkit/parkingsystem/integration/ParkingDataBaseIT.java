@@ -62,7 +62,7 @@ public class ParkingDataBaseIT {
     public void testParkingACar(){
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
-        //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
+
         Ticket ticket = ticketDAO.getTicket("ABCDEF");
         
         assertNotNull(ticket);
@@ -79,7 +79,7 @@ public class ParkingDataBaseIT {
     public void testParkingLotExit() throws SQLException, ClassNotFoundException {
         testParkingACar();
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        //TODO: check that the fare generated and out time are populated correctly in the database
+
         try(Connection con = dataBaseTestConfig.getConnection()){
             PreparedStatement ps = con.prepareStatement("UPDATE ticket SET IN_TIME = ? WHERE VEHICLE_REG_NUMBER = ?");
             ps.setTimestamp(1, new Timestamp(System.currentTimeMillis() - 60 * 60 * 1000)); // 1h avant
